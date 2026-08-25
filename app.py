@@ -57,7 +57,6 @@ def home():
     errors = []
 
     if request.method == "POST":
-        # --- Read form inputs, catching non-numeric input safely ---
         try:
             mass_kg = float(request.form["mass_kg"])
             wing_area_m2 = float(request.form["wing_area_m2"])
@@ -71,7 +70,6 @@ def home():
             errors.append("All fields must contain valid numbers.")
             mass_kg = wing_area_m2 = max_thrust_n = cd0 = k = cl_max = altitude_m = airspeed_ms = 0
 
-        # --- Validate inputs: catch physically impossible values early ---
         if mass_kg <= 0:
             errors.append("Mass must be greater than 0.")
         if wing_area_m2 <= 0:
@@ -89,10 +87,8 @@ def home():
         if airspeed_ms <= 0:
             errors.append("Airspeed must be greater than 0.")
 
-        # --- Only run calculations if all inputs are valid ---
         if not errors:
             try:
-                # --- Run the physics engine, same as in physics.py ---
                 rho = get_air_density(altitude_m)
                 weight = get_weight(mass_kg)
                 cl = get_required_cl(weight, rho, airspeed_ms, wing_area_m2)
@@ -105,16 +101,12 @@ def home():
                 excess_thrust = get_excess_thrust(max_thrust_n, drag)
                 roc = get_rate_of_climb(excess_thrust, airspeed_ms, weight)
 
-                # --- Sweep across a range of airspeeds for the graphs ---
                 airspeeds = list(range(20, 101, 2))
                 lift_values = []
                 drag_values = []
                 ld_values = []
                 roc_values = []
 
-                # Fixed CL used only for the Lift vs Airspeed plot, so it shows the
-                # true quadratic Lift-vs-V relationship instead of a flat line
-                # (using the level-flight CL there would always force lift = weight).
                 cl_fixed = 0.5
 
                 for v in airspeeds:
@@ -132,30 +124,27 @@ def home():
                     ld_values.append(v_ld)
                     roc_values.append(v_roc)
 
-                # --- Generate the four graphs as embeddable images ---
                 lift_plot = make_plot(airspeeds, lift_values, "Airspeed (m/s)", "Lift (N)", "Lift vs Airspeed (at fixed CL = 0.5)")
                 drag_plot = make_plot(airspeeds, drag_values, "Airspeed (m/s)", "Drag (N)", "Drag vs Airspeed")
                 ld_plot = make_plot(airspeeds, ld_values, "Airspeed (m/s)", "Lift-to-Drag Ratio", "Lift-to-Drag Ratio vs Airspeed")
                 roc_plot = make_plot(airspeeds, roc_values, "Airspeed (m/s)", "Rate of Climb (m/s)", "Rate of Climb vs Airspeed")
 
-                # --- Pull out the specific numbers that make each graph meaningful ---
-                # Lift at the fastest airspeed in the sweep, to show the range covered.
                 lift_at_max_speed = lift_values[-1]
                 lift_at_min_speed = lift_values[0]
 
-                # Drag has a minimum somewhere in the middle for most aircraft - find it.
                 min_drag = min(drag_values)
                 min_drag_speed = airspeeds[drag_values.index(min_drag)]
 
-                # Best L/D (best glide) speed is where the L/D curve peaks.
                 best_ld = max(ld_values)
                 best_ld_speed = airspeeds[ld_values.index(best_ld)]
 
-                # Best rate-of-climb speed is where the ROC curve peaks.
                 best_roc = max(roc_values)
                 best_roc_speed = airspeeds[roc_values.index(best_roc)]
 
-                # --- Package results into a dictionary to send to the HTML page ---
+                speed_vs_best_ld = round(airspeed_ms - best_ld_speed, 1)
+                speed_vs_best_roc = round(airspeed_ms - best_roc_speed, 1)
+                speed_vs_min_drag = round(airspeed_ms - min_drag_speed, 1)
+
                 results = {
                     "air_density": round(rho, 4),
                     "weight": round(weight, 2),
@@ -180,6 +169,20 @@ def home():
                     "best_ld_speed": best_ld_speed,
                     "best_roc": round(best_roc, 2),
                     "best_roc_speed": best_roc_speed,
+                    "your_speed": airspeed_ms,
+                    "speed_vs_best_ld": speed_vs_best_ld,
+                    "speed_vs_best_roc": speed_vs_best_roc,
+                    "speed_vs_min_drag": speed_vs_min_drag,
+                    "mass_kg": mass_kg,
+                    "wing_area_m2": wing_area_m2,
+                    "max_thrust_n": max_thrust_n,
+                    "cd0": cd0,
+                    "k": k,
+                    "cl_max": cl_max,
+                    "altitude_m": altitude_m,
+                    "cl": round(cl, 4),
+                    "cd": round(cd, 4),
+                    "gravity": 9.81,
                 }
             except Exception:
                 errors.append("Something went wrong during calculation. Please check your inputs and try again.")

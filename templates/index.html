@@ -46,6 +46,35 @@
             font-size: 0.9em;
         }
 
+        .work-box {
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+            background: #171412;
+            border: 1px solid #292018;
+            border-radius: 12px;
+            padding: 24px 28px;
+        }
+
+        p.work-step {
+            color: #f5e6d3;
+            opacity: 0.9;
+            font-size: 0.95em;
+            line-height: 1.7;
+            border-bottom: 1px solid #292018;
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+        }
+
+        p.work-step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        p.work-step strong {
+            color: #fbbf24;
+        }
+
         form {
             max-width: 500px;
             margin: 0 auto;
@@ -233,27 +262,120 @@
 
         <img class="result-img" src="data:image/png;base64,{{ results.lift_plot }}" alt="Lift vs Airspeed">
         <p class="graph-caption">
-            At a fixed lift coefficient, lift grows with the square of speed — from about {{ results.lift_at_min_speed }} N at {{ results.min_speed }} m/s
-            up to about {{ results.lift_at_max_speed }} N at {{ results.max_speed }} m/s in this sweep.
+            <strong>What this shows:</strong> lift is the upward force that holds the plane in the air. This graph shows that the faster the plane flies,
+            the more lift it makes — and it grows quickly, not in a straight line. Going from {{ results.min_speed }} m/s to {{ results.max_speed }} m/s
+            increases lift from about {{ results.lift_at_min_speed }} N to about {{ results.lift_at_max_speed }} N. In short: even a small increase in speed gives you a big boost in lift.
         </p>
 
         <img class="result-img" src="data:image/png;base64,{{ results.drag_plot }}" alt="Drag vs Airspeed">
         <p class="graph-caption">
-            Drag is lowest — about {{ results.min_drag }} N — around {{ results.min_drag_speed }} m/s. That's roughly your most fuel-efficient cruise speed;
-            flying slower or faster than that increases drag.
+            <strong>What this shows:</strong> drag is the force that slows the plane down, like air resistance. The lowest point on this graph
+            (about {{ results.min_drag }} N, near {{ results.min_drag_speed }} m/s) is the speed where the plane fights the least air resistance.
+            {% if results.speed_vs_min_drag > 0 %}
+                You entered {{ results.your_speed }} m/s, which is {{ results.speed_vs_min_drag }} m/s faster than that — meaning you're pushing through more drag than necessary.
+            {% elif results.speed_vs_min_drag < 0 %}
+                You entered {{ results.your_speed }} m/s, which is {{ -results.speed_vs_min_drag }} m/s slower than that — meaning you're also fighting more drag than necessary.
+            {% else %}
+                You entered {{ results.your_speed }} m/s — that's exactly the speed with the least drag. Nice.
+            {% endif %}
         </p>
 
         <img class="result-img" src="data:image/png;base64,{{ results.ld_plot }}" alt="Lift-to-Drag Ratio vs Airspeed">
         <p class="graph-caption">
-            Aerodynamic efficiency peaks at {{ results.best_ld }}:1 near {{ results.best_ld_speed }} m/s — that's your best glide speed,
-            giving you the most distance for each unit of altitude if the engine quits.
+            <strong>What this shows:</strong> this compares how much lift you get for the drag you pay for — think of it as the plane's "fuel efficiency."
+            The peak of {{ results.best_ld }} means at its best, the plane can travel {{ results.best_ld }} meters forward for every 1 meter it drops in altitude,
+            which happens around {{ results.best_ld_speed }} m/s.
+            {% if results.speed_vs_best_ld > 0 %}
+                You entered {{ results.your_speed }} m/s — that's {{ results.speed_vs_best_ld }} m/s above this ideal speed, so you'd glide a bit less efficiently than the best case.
+            {% elif results.speed_vs_best_ld < 0 %}
+                You entered {{ results.your_speed }} m/s — that's {{ -results.speed_vs_best_ld }} m/s below this ideal speed, so you'd glide a bit less efficiently than the best case.
+            {% else %}
+                You entered {{ results.your_speed }} m/s — right at the most efficient gliding speed.
+            {% endif %}
+            This matters most if the engine ever stops: flying at this speed gets you the farthest before landing.
         </p>
 
         <img class="result-img" src="data:image/png;base64,{{ results.roc_plot }}" alt="Rate of Climb vs Airspeed">
         <p class="graph-caption">
-            Climb rate peaks at about {{ results.best_roc }} m/s near an airspeed of {{ results.best_roc_speed }} m/s —
-            that's your best rate-of-climb speed, the fastest way to gain altitude.
+            <strong>What this shows:</strong> how quickly the plane can gain altitude at different speeds. The highest point, about {{ results.best_roc }} m/s of climb,
+            happens around {{ results.best_roc_speed }} m/s of airspeed — that's the fastest way to climb.
+            {% if results.speed_vs_best_roc > 0 %}
+                You entered {{ results.your_speed }} m/s, which is {{ results.speed_vs_best_roc }} m/s faster than this ideal climb speed — so you'd climb a bit slower than the plane's best.
+            {% elif results.speed_vs_best_roc < 0 %}
+                You entered {{ results.your_speed }} m/s, which is {{ -results.speed_vs_best_roc }} m/s slower than this ideal climb speed — so you'd climb a bit slower than the plane's best.
+            {% else %}
+                You entered {{ results.your_speed }} m/s — exactly the speed for the fastest possible climb.
+            {% endif %}
         </p>
+
+        <h2>How It's Calculated</h2>
+        <div class="work-box">
+            <p class="work-step">
+                <strong>1. Air density (ρ)</strong> — uses the International Standard Atmosphere model, which
+                predicts how air pressure and temperature drop as altitude increases. At {{ results.altitude_m }} m,
+                this works out to <strong>ρ = {{ results.air_density }} kg/m³</strong> (sea level is about 1.225 kg/m³, so
+                the air here is {{ 'thinner' if results.air_density < 1.225 else 'about the same density' }}).
+            </p>
+
+            <p class="work-step">
+                <strong>2. Weight (W)</strong> — Weight = mass × gravity<br>
+                W = {{ results.mass_kg }} kg × {{ results.gravity }} m/s² = <strong>{{ results.weight }} N</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>3. Required lift coefficient (CL)</strong> — this is how much "lifting power" the wing shape needs to produce at your chosen speed, so that lift exactly balances weight.<br>
+                CL = 2W / (ρ × V² × S)<br>
+                CL = 2 × {{ results.weight }} / ({{ results.air_density }} × {{ results.your_speed }}² × {{ results.wing_area_m2 }}) = <strong>{{ results.cl }}</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>4. Drag coefficient (CD)</strong> — every wing has some baseline drag (CD0) plus extra drag that comes from producing lift (the k × CL² term).<br>
+                CD = CD0 + k × CL²<br>
+                CD = {{ results.cd0 }} + {{ results.k }} × {{ results.cl }}² = <strong>{{ results.cd }}</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>5. Lift (L)</strong> — the upward force the wings generate at your input speed.<br>
+                L = 0.5 × ρ × V² × S × CL<br>
+                L = 0.5 × {{ results.air_density }} × {{ results.your_speed }}² × {{ results.wing_area_m2 }} × {{ results.cl }} = <strong>{{ results.lift }} N</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>6. Drag (D)</strong> — the backward force resisting the plane's motion at your input speed.<br>
+                D = 0.5 × ρ × V² × S × CD<br>
+                D = 0.5 × {{ results.air_density }} × {{ results.your_speed }}² × {{ results.wing_area_m2 }} × {{ results.cd }} = <strong>{{ results.drag }} N</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>7. Stall speed (V<sub>stall</sub>)</strong> — the slowest speed the plane can fly before the wings stop producing enough lift (CL max reached).<br>
+                V<sub>stall</sub> = √(2W / (ρ × S × CL<sub>max</sub>))<br>
+                V<sub>stall</sub> = √(2 × {{ results.weight }} / ({{ results.air_density }} × {{ results.wing_area_m2 }} × {{ results.cl_max }})) = <strong>{{ results.stall_speed }} m/s</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>8. Lift-to-drag ratio (L/D)</strong> — a measure of aerodynamic efficiency: how much lift you get per unit of drag.<br>
+                L/D = Lift ÷ Drag<br>
+                L/D = {{ results.lift }} ÷ {{ results.drag }} = <strong>{{ results.ld_ratio }}</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>9. Thrust-to-weight ratio (T/W)</strong> — compares the engine's push to the plane's weight; higher means more acceleration and climb potential.<br>
+                T/W = Max thrust ÷ Weight<br>
+                T/W = {{ results.max_thrust_n }} ÷ {{ results.weight }} = <strong>{{ results.twr }}</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>10. Excess thrust</strong> — how much "extra" push the engine has left over after overcoming drag. This spare thrust is what climbs the plane.<br>
+                Excess thrust = Max thrust − Drag<br>
+                Excess thrust = {{ results.max_thrust_n }} − {{ results.drag }} = <strong>{{ results.excess_thrust }} N</strong>
+            </p>
+
+            <p class="work-step">
+                <strong>11. Rate of climb (ROC)</strong> — how fast (in m/s) the plane can gain altitude, using that leftover excess thrust.<br>
+                ROC = (Excess thrust × V) ÷ Weight<br>
+                ROC = ({{ results.excess_thrust }} × {{ results.your_speed }}) ÷ {{ results.weight }} = <strong>{{ results.roc }} m/s</strong>
+            </p>
+        </div>
     {% endif %}
 
 </body>
