@@ -57,15 +57,19 @@ def home():
     errors = []
 
     if request.method == "POST":
-        # --- Read form inputs (all come in as text, so we convert to float) ---
-        mass_kg = float(request.form["mass_kg"])
-        wing_area_m2 = float(request.form["wing_area_m2"])
-        max_thrust_n = float(request.form["max_thrust_n"])
-        cd0 = float(request.form["cd0"])
-        k = float(request.form["k"])
-        cl_max = float(request.form["cl_max"])
-        altitude_m = float(request.form["altitude_m"])
-        airspeed_ms = float(request.form["airspeed_ms"])
+        # --- Read form inputs, catching non-numeric input safely ---
+        try:
+            mass_kg = float(request.form["mass_kg"])
+            wing_area_m2 = float(request.form["wing_area_m2"])
+            max_thrust_n = float(request.form["max_thrust_n"])
+            cd0 = float(request.form["cd0"])
+            k = float(request.form["k"])
+            cl_max = float(request.form["cl_max"])
+            altitude_m = float(request.form["altitude_m"])
+            airspeed_ms = float(request.form["airspeed_ms"])
+        except ValueError:
+            errors.append("All fields must contain valid numbers.")
+            mass_kg = wing_area_m2 = max_thrust_n = cd0 = k = cl_max = altitude_m = airspeed_ms = 0
 
         # --- Validate inputs: catch physically impossible values early ---
         if mass_kg <= 0:
