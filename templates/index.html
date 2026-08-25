@@ -18,7 +18,7 @@
             background: linear-gradient(90deg, #f59e0b, #fbbf24, #fde68a);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         h2 {
@@ -26,6 +26,15 @@
             border-bottom: 2px solid #78350f;
             padding-bottom: 8px;
             margin-top: 40px;
+        }
+
+        p.intro {
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            text-align: center;
+            color: #f5e6d3;
+            opacity: 0.85;
+            line-height: 1.6;
         }
 
         form {
@@ -54,6 +63,10 @@
             color: #f5e6d3;
             font-size: 1em;
             box-sizing: border-box;
+        }
+
+        input::placeholder {
+            color: #6b5d4f;
         }
 
         input:focus {
@@ -150,6 +163,10 @@
 
     <h1>Flight Performance Analyzer</h1>
 
+    <p class="intro">
+        Enter your aircraft's specifications below to calculate lift, drag, stall speed, and climb performance — powered by real aerodynamic equations (ISA atmosphere model, drag polar, and thrust-to-weight analysis).
+    </p>
+
     {% if errors %}
         <div class="error-box">
             <h3>Please fix the following:</h3>
@@ -163,28 +180,28 @@
 
     <form method="POST">
         <label for="mass_kg">Mass (kg):</label><br>
-        <input type="number" step="any" name="mass_kg" value="{{ request.form.get('mass_kg', '') }}" required><br><br>
+        <input type="number" step="any" name="mass_kg" value="{{ request.form.get('mass_kg', '') }}" placeholder="e.g. 1200" required><br><br>
 
         <label for="wing_area_m2">Wing Area (m^2):</label><br>
-        <input type="number" step="any" name="wing_area_m2" value="{{ request.form.get('wing_area_m2', '') }}" required><br><br>
+        <input type="number" step="any" name="wing_area_m2" value="{{ request.form.get('wing_area_m2', '') }}" placeholder="e.g. 16.2" required><br><br>
 
         <label for="max_thrust_n">Max Thrust (N):</label><br>
-        <input type="number" step="any" name="max_thrust_n" value="{{ request.form.get('max_thrust_n', '') }}" required><br><br>
+        <input type="number" step="any" name="max_thrust_n" value="{{ request.form.get('max_thrust_n', '') }}" placeholder="e.g. 2500" required><br><br>
 
         <label for="cd0">CD0:</label><br>
-        <input type="number" step="any" name="cd0" value="{{ request.form.get('cd0', '') }}" required><br><br>
+        <input type="number" step="any" name="cd0" value="{{ request.form.get('cd0', '') }}" placeholder="e.g. 0.027" required><br><br>
 
         <label for="k">Induced Drag Factor (k):</label><br>
-        <input type="number" step="any" name="k" value="{{ request.form.get('k', '') }}" required><br><br>
+        <input type="number" step="any" name="k" value="{{ request.form.get('k', '') }}" placeholder="e.g. 0.045" required><br><br>
 
         <label for="cl_max">CL max:</label><br>
-        <input type="number" step="any" name="cl_max" value="{{ request.form.get('cl_max', '') }}" required><br><br>
+        <input type="number" step="any" name="cl_max" value="{{ request.form.get('cl_max', '') }}" placeholder="e.g. 1.4" required><br><br>
 
         <label for="altitude_m">Altitude (m):</label><br>
-        <input type="number" step="any" name="altitude_m" value="{{ request.form.get('altitude_m', '') }}" required><br><br>
+        <input type="number" step="any" name="altitude_m" value="{{ request.form.get('altitude_m', '') }}" placeholder="e.g. 2000" required><br><br>
 
         <label for="airspeed_ms">Airspeed (m/s):</label><br>
-        <input type="number" step="any" name="airspeed_ms" value="{{ request.form.get('airspeed_ms', '') }}" required><br><br>
+        <input type="number" step="any" name="airspeed_ms" value="{{ request.form.get('airspeed_ms', '') }}" placeholder="e.g. 60" required><br><br>
 
         <button type="submit">Analyze</button>
     </form>
