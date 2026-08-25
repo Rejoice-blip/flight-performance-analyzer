@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flight Performance Analyzer</title>
+</head>
+<body>
+
+    <h1>Flight Performance Analyzer</h1>
+
+    <form method="POST">
+        <label for="mass_kg">Mass (kg):</label><br>
+        <input type="number" step="any" name="mass_kg" required><br><br>
+
+        <label for="wing_area_m2">Wing Area (m^2):</label><br>
+        <input type="number" step="any" name="wing_area_m2" required><br><br>
+
+        <label for="max_thrust_n">Max Thrust (N):</label><br>
+        <input type="number" step="any" name="max_thrust_n" required><br><br>
+
+        <label for="cd0">CD0:</label><br>
+        <input type="number" step="any" name="cd0" required><br><br>
+
+        <label for="k">Induced Drag Factor (k):</label><br>
+        <input type="number" step="any" name="k" required><br><br>
+
+        <label for="cl_max">CL max:</label><br>
+        <input type="number" step="any" name="cl_max" required><br><br>
+
+        <label for="altitude_m">Altitude (m):</label><br>
+        <input type="number" step="any" name="altitude_m" required><br><br>
+
+        <label for="airspeed_ms">Airspeed (m/s):</label><br>
+        <input type="number" step="any" name="airspeed_ms" required><br><br>
+
+        <button type="submit">Analyze</button>
+    </form>
+
+        {% if results %}
+        <h2>Results</h2>
+        <ul>
+            <li>Air density: {{ results.air_density }} kg/m^3</li>
+            <li>Weight: {{ results.weight }} N</li>
+            <li>Lift: {{ results.lift }} N</li>
+            <li>Drag: {{ results.drag }} N</li>
+            <li>Stall speed: {{ results.stall_speed }} m/s</li>
+            <li>Lift-to-drag ratio: {{ results.ld_ratio }}</li>
+            <li>Thrust-to-weight ratio: {{ results.twr }}</li>
+            <li>Excess thrust: {{ results.excess_thrust }} N</li>
+            <li>Rate of climb: {{ results.roc }} m/s</li>
+        </ul>
+    {% endif %}
+
+</body>
+</html>
