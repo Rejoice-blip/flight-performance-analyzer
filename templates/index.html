@@ -8,6 +8,17 @@
 
     <h1>Flight Performance Analyzer</h1>
 
+    {% if errors %}
+        <div style="color: red;">
+            <h3>Please fix the following:</h3>
+            <ul>
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     <form method="POST">
         <label for="mass_kg">Mass (kg):</label><br>
         <input type="number" step="any" name="mass_kg" required><br><br>
@@ -36,7 +47,7 @@
         <button type="submit">Analyze</button>
     </form>
 
-        {% if results %}
+    {% if results %}
         <h2>Results</h2>
         <ul>
             <li>Air density: {{ results.air_density }} kg/m^3</li>
@@ -49,7 +60,8 @@
             <li>Excess thrust: {{ results.excess_thrust }} N</li>
             <li>Rate of climb: {{ results.roc }} m/s</li>
         </ul>
-                <h2>Performance Graphs</h2>
+
+        <h2>Performance Graphs</h2>
 
         <img src="data:image/png;base64,{{ results.lift_plot }}" alt="Lift vs Airspeed"><br>
         <img src="data:image/png;base64,{{ results.drag_plot }}" alt="Drag vs Airspeed"><br>
