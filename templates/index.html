@@ -3,13 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <title>Flight Performance Analyzer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #3b0a2a, #831843);
+            color: #fce7f3;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #ec4899, #f9a8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #f9a8d4;
+            border-bottom: 2px solid #831843;
+            padding-bottom: 8px;
+            margin-top: 40px;
+        }
+
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #500724;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        label {
+            font-weight: 600;
+            color: #f9a8d4;
+            font-size: 0.9em;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #831843;
+            border-radius: 6px;
+            background: #3b0a2a;
+            color: #fce7f3;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ec4899;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: linear-gradient(90deg, #ec4899, #f9a8d4);
+            color: #3b0a2a;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        ul {
+            max-width: 500px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+            background: #500724;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        li {
+            padding: 14px 20px;
+            border-bottom: 1px solid #831843;
+            color: #fce7f3;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        img {
+            display: block;
+            max-width: 700px;
+            width: 100%;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .error-box {
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+            background: #4c0519;
+            border: 1px solid #ec4899;
+            border-radius: 8px;
+            padding: 16px 20px;
+            color: #fbcfe8;
+        }
+    </style>
 </head>
 <body>
 
     <h1>Flight Performance Analyzer</h1>
 
     {% if errors %}
-        <div style="color: red;">
+        <div class="error-box">
             <h3>Please fix the following:</h3>
             <ul>
             {% for error in errors %}

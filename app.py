@@ -31,12 +31,16 @@ def make_plot(x_values, y_values, xlabel, ylabel, title):
     Creates a plot and returns it as a Base64-encoded string,
     which can be embedded directly in an HTML <img> tag.
     """
-    fig, ax = plt.subplots()
-    ax.plot(x_values, y_values)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    ax.grid(True)
+    fig, ax = plt.subplots(facecolor="#500724")
+    ax.set_facecolor("#3b0a2a")
+    ax.plot(x_values, y_values, color="#ec4899", linewidth=2)
+    ax.set_xlabel(xlabel, color="#f9a8d4")
+    ax.set_ylabel(ylabel, color="#f9a8d4")
+    ax.set_title(title, color="#fce7f3")
+    ax.tick_params(colors="#f9a8d4")
+    ax.grid(True, color="#831843")
+    for spine in ax.spines.values():
+        spine.set_color("#831843")
 
     buffer = io.BytesIO()
     fig.savefig(buffer, format="png")
