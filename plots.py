@@ -1,6 +1,6 @@
 # plots.py
 # Flight Performance Analyzer - Visualization
-# Generates Lift vs Airspeed, Drag vs Airspeed, and L/D vs Airspeed graphs.
+# Generates Lift vs Airspeed, Drag vs Airspeed, L/D vs Airspeed, and ROC vs Airspeed graphs.
 
 import matplotlib.pyplot as plt
 from physics import (
@@ -27,12 +27,11 @@ max_thrust_n = 2500
 airspeeds = list(range(20, 101, 2))   # from 20 to 100 m/s, in steps of 2
 
 # --- Lists to store results at each airspeed ---
-lift_values = []
 drag_values = []
 ld_values = []
 roc_values = []
 
-# --- Calculate lift, drag, and L/D at each airspeed ---
+# --- Calculate drag, L/D, and ROC at each airspeed (level flight: CL solved so lift = weight) ---
 rho = get_air_density(altitude_m)
 weight = get_weight(mass_kg)
 
@@ -45,21 +44,29 @@ for v in airspeeds:
     excess_thrust = get_excess_thrust(max_thrust_n, drag)
     roc = get_rate_of_climb(excess_thrust, v, weight)
 
-    lift_values.append(lift)
     drag_values.append(drag)
     ld_values.append(ld_ratio)
     roc_values.append(roc)
 
-    # --- Create the plots ---
+# --- Separate calculation for Lift vs Airspeed plot ---
+# (uses fixed CL to show the true lift-airspeed relationship,
+# rather than the level-flight CL which always forces lift = weight)
+cl_fixed = 0.5  # representative cruise CL — adjust if you want a different reference point
+
+lift_values_fixed_cl = []
+for v in airspeeds:
+    lift_fixed = get_lift(rho, v, wing_area_m2, cl_fixed)
+    lift_values_fixed_cl.append(lift_fixed)
+
+# --- Create the plots ---
 
 # Plot 1: Lift vs Airspeed
 plt.figure()
-plt.plot(airspeeds, lift_values)
+plt.plot(airspeeds, lift_values_fixed_cl)
 plt.xlabel("Airspeed (m/s)")
 plt.ylabel("Lift (N)")
-plt.title("Lift vs Airspeed")
+plt.title("Lift vs Airspeed (at fixed CL = 0.5)")
 plt.grid(True)
-
 plt.savefig("lift_vs_airspeed.png")
 
 # Plot 2: Drag vs Airspeed
@@ -69,7 +76,6 @@ plt.xlabel("Airspeed (m/s)")
 plt.ylabel("Drag (N)")
 plt.title("Drag vs Airspeed")
 plt.grid(True)
-
 plt.savefig("drag_vs_airspeed.png")
 
 # Plot 3: Lift-to-Drag Ratio vs Airspeed
@@ -79,6 +85,7 @@ plt.xlabel("Airspeed (m/s)")
 plt.ylabel("Lift-to-Drag Ratio")
 plt.title("Lift-to-Drag Ratio vs Airspeed")
 plt.grid(True)
+plt.savefig("ld_ratio_vs_airspeed.png")
 
 # Plot 4: Rate of Climb vs Airspeed
 plt.figure()
@@ -89,6 +96,5 @@ plt.title("Rate of Climb vs Airspeed")
 plt.grid(True)
 plt.savefig("roc_vs_airspeed.png")
 
-plt.savefig("ld_ratio_vs_airspeed.png")
 # --- Show all plots on screen ---
 plt.show()

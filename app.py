@@ -112,22 +112,28 @@ def home():
                 ld_values = []
                 roc_values = []
 
+                # Fixed CL used only for the Lift vs Airspeed plot, so it shows the
+                # true quadratic Lift-vs-V relationship instead of a flat line
+                # (using the level-flight CL there would always force lift = weight).
+                cl_fixed = 0.5
+
                 for v in airspeeds:
                     v_cl = get_required_cl(weight, rho, v, wing_area_m2)
                     v_cd = get_cd(v_cl, cd0, k)
-                    v_lift = get_lift(rho, v, wing_area_m2, v_cl)
+                    v_lift_level_flight = get_lift(rho, v, wing_area_m2, v_cl)
+                    v_lift_fixed_cl = get_lift(rho, v, wing_area_m2, cl_fixed)
                     v_drag = get_drag(rho, v, wing_area_m2, v_cd)
-                    v_ld = get_lift_to_drag_ratio(v_lift, v_drag)
+                    v_ld = get_lift_to_drag_ratio(v_lift_level_flight, v_drag)
                     v_excess_thrust = get_excess_thrust(max_thrust_n, v_drag)
                     v_roc = get_rate_of_climb(v_excess_thrust, v, weight)
 
-                    lift_values.append(v_lift)
+                    lift_values.append(v_lift_fixed_cl)
                     drag_values.append(v_drag)
                     ld_values.append(v_ld)
                     roc_values.append(v_roc)
 
                 # --- Generate the four graphs as embeddable images ---
-                lift_plot = make_plot(airspeeds, lift_values, "Airspeed (m/s)", "Lift (N)", "Lift vs Airspeed")
+                lift_plot = make_plot(airspeeds, lift_values, "Airspeed (m/s)", "Lift (N)", "Lift vs Airspeed (at fixed CL = 0.5)")
                 drag_plot = make_plot(airspeeds, drag_values, "Airspeed (m/s)", "Drag (N)", "Drag vs Airspeed")
                 ld_plot = make_plot(airspeeds, ld_values, "Airspeed (m/s)", "Lift-to-Drag Ratio", "Lift-to-Drag Ratio vs Airspeed")
                 roc_plot = make_plot(airspeeds, roc_values, "Airspeed (m/s)", "Rate of Climb (m/s)", "Rate of Climb vs Airspeed")
