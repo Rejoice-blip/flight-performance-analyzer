@@ -1,6 +1,12 @@
 # app.py
 # Flight Performance Analyzer - Web Server
 
+import io
+import base64
+import matplotlib
+matplotlib.use("Agg")  # use a non-interactive backend, since this runs on a server, not your screen
+import matplotlib.pyplot as plt
+
 from flask import Flask, render_template, request
 
 from physics import (
@@ -18,6 +24,28 @@ from physics import (
 )
 
 app = Flask(__name__)
+
+def make_plot(x_values, y_values, xlabel, ylabel, title):
+    """
+    Creates a plot and returns it as a Base64-encoded string,
+    which can be embedded directly in an HTML <img> tag.
+    """
+    fig, ax = plt.subplots()
+    ax.plot(x_values, y_values)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.grid(True)
+
+    # Save the plot into memory instead of a file
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png")
+    plt.close(fig)  # free up memory, since we won't need this figure anymore
+    buffer.seek(0)
+
+    # Convert the image bytes into a Base64 text string
+    image_base64 = base64.b64encode(buffer.read()).decode("utf-8")
+    return image_base64
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -48,6 +76,33 @@ def home():
         excess_thrust = get_excess_thrust(max_thrust_n, drag)
         roc = get_rate_of_climb(excess_thrust, airspeed_ms, weight)
 
+        # --- Sweep across a range of airspeeds for the graphs ---
+        airspeeds = list(range(20, 101, 2))
+        lift_values = []
+        drag_values = []
+        ld_values = []
+        roc_values = []
+
+        for v in airspeeds:
+            v_cl = get_required_cl(weight, rho, v, wing_area_m2)
+            v_cd = get_cd(v_cl, cd0, k)
+            v_lift = get_lift(rho, v, wing_area_m2, v_cl)
+            v_drag = get_drag(rho, v, wing_area_m2, v_cd)
+            v_ld = get_lift_to_drag_ratio(v_lift, v_drag)
+            v_excess_thrust = get_excess_thrust(max_thrust_n, v_drag)
+            v_roc = get_rate_of_climb(v_excess_thrust, v, weight)
+
+            lift_values.append(v_lift)
+            drag_values.append(v_drag)
+            ld_values.append(v_ld)
+            roc_values.append(v_roc)
+
+        # --- Generate the four graphs as embeddable images ---
+        lift_plot = make_plot(airspeeds, lift_values, "Airspeed (m/s)", "Lift (N)", "Lift vs Airspeed")
+        drag_plot = make_plot(airspeeds, drag_values, "Airspeed (m/s)", "Drag (N)", "Drag vs Airspeed")
+        ld_plot = make_plot(airspeeds, ld_values, "Airspeed (m/s)", "Lift-to-Drag Ratio", "Lift-to-Drag Ratio vs Airspeed")
+        roc_plot = make_plot(airspeeds, roc_values, "Airspeed (m/s)", "Rate of Climb (m/s)", "Rate of Climb vs Airspeed")
+
         # --- Package results into a dictionary to send to the HTML page ---
         results = {
             "air_density": round(rho, 4),
@@ -59,6 +114,10 @@ def home():
             "twr": round(twr, 3),
             "excess_thrust": round(excess_thrust, 2),
             "roc": round(roc, 2),
+                        "lift_plot": lift_plot,
+            "drag_plot": drag_plot,
+            "ld_plot": ld_plot,
+            "roc_plot": roc_plot,
         }
 
     return render_template("index.html", results=results)

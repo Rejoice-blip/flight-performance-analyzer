@@ -49,6 +49,12 @@
             <li>Excess thrust: {{ results.excess_thrust }} N</li>
             <li>Rate of climb: {{ results.roc }} m/s</li>
         </ul>
+                <h2>Performance Graphs</h2>
+
+        <img src="data:image/png;base64,{{ results.lift_plot }}" alt="Lift vs Airspeed"><br>
+        <img src="data:image/png;base64,{{ results.drag_plot }}" alt="Drag vs Airspeed"><br>
+        <img src="data:image/png;base64,{{ results.ld_plot }}" alt="Lift-to-Drag Ratio vs Airspeed"><br>
+        <img src="data:image/png;base64,{{ results.roc_plot }}" alt="Rate of Climb vs Airspeed"><br>
     {% endif %}
 
 </body>
