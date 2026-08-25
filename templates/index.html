@@ -37,6 +37,15 @@
             line-height: 1.6;
         }
 
+        p.graph-caption {
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+            text-align: center;
+            color: #f5e6d3;
+            opacity: 0.75;
+            font-size: 0.9em;
+        }
+
         form {
             max-width: 500px;
             margin: 0 auto;
@@ -222,10 +231,29 @@
 
         <h2>Performance Graphs</h2>
 
-        <img class="result-img" src="data:image/png;base64,{{ results.lift_plot }}" alt="Lift vs Airspeed"><br>
-        <img class="result-img" src="data:image/png;base64,{{ results.drag_plot }}" alt="Drag vs Airspeed"><br>
-        <img class="result-img" src="data:image/png;base64,{{ results.ld_plot }}" alt="Lift-to-Drag Ratio vs Airspeed"><br>
-        <img class="result-img" src="data:image/png;base64,{{ results.roc_plot }}" alt="Rate of Climb vs Airspeed"><br>
+        <img class="result-img" src="data:image/png;base64,{{ results.lift_plot }}" alt="Lift vs Airspeed">
+        <p class="graph-caption">
+            At a fixed lift coefficient, lift grows with the square of speed — from about {{ results.lift_at_min_speed }} N at {{ results.min_speed }} m/s
+            up to about {{ results.lift_at_max_speed }} N at {{ results.max_speed }} m/s in this sweep.
+        </p>
+
+        <img class="result-img" src="data:image/png;base64,{{ results.drag_plot }}" alt="Drag vs Airspeed">
+        <p class="graph-caption">
+            Drag is lowest — about {{ results.min_drag }} N — around {{ results.min_drag_speed }} m/s. That's roughly your most fuel-efficient cruise speed;
+            flying slower or faster than that increases drag.
+        </p>
+
+        <img class="result-img" src="data:image/png;base64,{{ results.ld_plot }}" alt="Lift-to-Drag Ratio vs Airspeed">
+        <p class="graph-caption">
+            Aerodynamic efficiency peaks at {{ results.best_ld }}:1 near {{ results.best_ld_speed }} m/s — that's your best glide speed,
+            giving you the most distance for each unit of altitude if the engine quits.
+        </p>
+
+        <img class="result-img" src="data:image/png;base64,{{ results.roc_plot }}" alt="Rate of Climb vs Airspeed">
+        <p class="graph-caption">
+            Climb rate peaks at about {{ results.best_roc }} m/s near an airspeed of {{ results.best_roc_speed }} m/s —
+            that's your best rate-of-climb speed, the fastest way to gain altitude.
+        </p>
     {% endif %}
 
 </body>

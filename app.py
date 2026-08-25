@@ -31,16 +31,16 @@ def make_plot(x_values, y_values, xlabel, ylabel, title):
     Creates a plot and returns it as a Base64-encoded string,
     which can be embedded directly in an HTML <img> tag.
     """
-    fig, ax = plt.subplots(facecolor="#500724")
-    ax.set_facecolor("#3b0a2a")
-    ax.plot(x_values, y_values, color="#ec4899", linewidth=2)
-    ax.set_xlabel(xlabel, color="#f9a8d4")
-    ax.set_ylabel(ylabel, color="#f9a8d4")
-    ax.set_title(title, color="#fce7f3")
-    ax.tick_params(colors="#f9a8d4")
-    ax.grid(True, color="#831843")
+    fig, ax = plt.subplots(facecolor="#171412")
+    ax.set_facecolor("#0a0a0a")
+    ax.plot(x_values, y_values, color="#f59e0b", linewidth=2)
+    ax.set_xlabel(xlabel, color="#fbbf24")
+    ax.set_ylabel(ylabel, color="#fbbf24")
+    ax.set_title(title, color="#f5e6d3")
+    ax.tick_params(colors="#fbbf24")
+    ax.grid(True, color="#292018")
     for spine in ax.spines.values():
-        spine.set_color("#831843")
+        spine.set_color("#292018")
 
     buffer = io.BytesIO()
     fig.savefig(buffer, format="png")
@@ -138,6 +138,23 @@ def home():
                 ld_plot = make_plot(airspeeds, ld_values, "Airspeed (m/s)", "Lift-to-Drag Ratio", "Lift-to-Drag Ratio vs Airspeed")
                 roc_plot = make_plot(airspeeds, roc_values, "Airspeed (m/s)", "Rate of Climb (m/s)", "Rate of Climb vs Airspeed")
 
+                # --- Pull out the specific numbers that make each graph meaningful ---
+                # Lift at the fastest airspeed in the sweep, to show the range covered.
+                lift_at_max_speed = lift_values[-1]
+                lift_at_min_speed = lift_values[0]
+
+                # Drag has a minimum somewhere in the middle for most aircraft - find it.
+                min_drag = min(drag_values)
+                min_drag_speed = airspeeds[drag_values.index(min_drag)]
+
+                # Best L/D (best glide) speed is where the L/D curve peaks.
+                best_ld = max(ld_values)
+                best_ld_speed = airspeeds[ld_values.index(best_ld)]
+
+                # Best rate-of-climb speed is where the ROC curve peaks.
+                best_roc = max(roc_values)
+                best_roc_speed = airspeeds[roc_values.index(best_roc)]
+
                 # --- Package results into a dictionary to send to the HTML page ---
                 results = {
                     "air_density": round(rho, 4),
@@ -153,6 +170,16 @@ def home():
                     "drag_plot": drag_plot,
                     "ld_plot": ld_plot,
                     "roc_plot": roc_plot,
+                    "lift_at_min_speed": round(lift_at_min_speed, 1),
+                    "lift_at_max_speed": round(lift_at_max_speed, 1),
+                    "min_speed": airspeeds[0],
+                    "max_speed": airspeeds[-1],
+                    "min_drag": round(min_drag, 1),
+                    "min_drag_speed": min_drag_speed,
+                    "best_ld": round(best_ld, 2),
+                    "best_ld_speed": best_ld_speed,
+                    "best_roc": round(best_roc, 2),
+                    "best_roc_speed": best_roc_speed,
                 }
             except Exception:
                 errors.append("Something went wrong during calculation. Please check your inputs and try again.")
