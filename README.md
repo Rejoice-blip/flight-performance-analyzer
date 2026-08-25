@@ -5,6 +5,8 @@ performance under different flight conditions. Built as an independent
 engineering software project, combining aerospace fundamentals with a
 working Python backend and web interface.
 
+![Flight Performance Analyzer Dashboard](screenshot.png)
+
 ## What it does
 
 Given an aircraft's physical/aerodynamic properties and a set of flight
